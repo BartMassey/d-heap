@@ -1,5 +1,10 @@
 // Copyright © 2017 Bart Massey
-// k-ary heaps
+
+// This work is made available under the "MIT License".
+// Please see the file LICENSE in this distribution
+// for license terms.
+
+// k-ary heapsort
 
 #![cfg_attr(test, feature(test))]
 
