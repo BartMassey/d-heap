@@ -6,28 +6,24 @@
 
 // k-ary heapsort
 
-#![cfg_attr(test, feature(test))]
-
-#[cfg(test)]
-extern crate test;
-
-#[cfg(test)]
-use test::Bencher;
-
-#[cfg(test)]
-const N_BENCH: u32 = 4 * 1024 * 1024;
-
 extern crate pcg_rand;
 extern crate rand;
+extern crate criterion;
+use criterion::Criterion;
 
 use rand::Rng;
 use pcg_rand::Pcg32;
 
+#[cfg(test)]
+const K: usize = 1024;
+#[cfg(test)]
+const N_BENCH: u32 = 128*K as u32;
+
 // Benchmark sort timings, 1M in-order entries:
-// K=8, 0.15s
-// K=4, 0.12s
-// K=2, 0.14s
-const K: usize = 2;
+// D=8, 0.15s
+// D=4, 0.12s
+// D=2, 0.14s
+const D: usize = 2;
 
 fn unsorted(n: usize) -> Vec<u32> {
     let mut pcg = Pcg32::new_unseeded();
@@ -44,7 +40,7 @@ fn downheap(a: &mut[u32], i0: usize) {
     let mut i = i0;
     loop {
         let mut m = i;
-        for j in K*i+1..K*i+1+K {
+        for j in D*i+1..D*i+1+D {
             if j >= a.len() {
                 break
             };
@@ -68,7 +64,7 @@ fn heapify(a: &mut[u32]) {
 
 #[cfg(test)]
 fn checkheap(a: &[u32], i: usize) {
-    for j in K*i+1..K*i+1+K {
+    for j in D*i+1..D*i+1+D {
         if j >= a.len() {
             return
         };
@@ -79,7 +75,7 @@ fn checkheap(a: &[u32], i: usize) {
 
 #[test]
 fn test_heapify() {
-    let mut a = unsorted(3*K+17);
+    let mut a = unsorted(3*D+17);
     heapify(&mut a);
     checkheap(&a, 0)
 }
@@ -94,18 +90,20 @@ fn heapsort(a: &mut[u32]) {
 
 #[test]
 fn test_heapsort() {
-    let mut a = unsorted(3*K+17);
+    let mut a = unsorted(3*D+17);
     heapsort(&mut a);
     for i in 1..a.len() {
         assert!(a[i-1] <= a[i]);
     }
 }
 
-#[cfg(test)]
-#[bench]
-fn bench_heapsort(b: &mut Bencher) {
-    let mut a: Vec<u32> = (0..N_BENCH).collect();
-    b.iter(|| heapsort(&mut a))
+#[test]
+fn bench_heapsort() {
+    Criterion::default().bench_function_over_inputs("heapsort",
+        |b, &&size| {
+            let mut a: Vec<u32> = (0u32..size as u32).collect();
+            b.iter(|| heapsort(&mut a))
+        }, &[K, 4*K, 16*K, 64*K]);
 }
 
 fn extract(a: &mut Vec<u32>) -> u32 {
@@ -132,7 +130,7 @@ fn heapsort_extract(mut a: &mut Vec<u32>) -> Vec<u32> {
 
 #[test]
 fn test_heapsort_extract() {
-    let n = 3*K+17;
+    let n = 3*D+17;
     let mut a = unsorted(n);
     let r = heapsort_extract(&mut a);
     assert!(r.len() == n);
@@ -141,19 +139,22 @@ fn test_heapsort_extract() {
     }
 }
 
-#[cfg(test)]
-#[bench]
-fn bench_heapsort_extract(b: &mut Bencher) {
+#[test]
+fn bench_heapsort_extract() {
     let a: Vec<u32> = (0..N_BENCH).collect();
-    b.iter(|| {let r = heapsort_extract(&mut a.clone()); assert!(r[0] == 0)})
+    Criterion::default().bench_function(
+        "heapsort_extract",
+        |b| b.iter(|| {
+            let r = heapsort_extract(&mut a.clone());
+            assert!(r[0] == 0)}));
 }
 
 fn upheap(a: &mut[u32], i0: usize) {
     let mut i = i0;
     while i > 0 {
-        let p = (i - 1) / K;
+        let p = (i - 1) / D;
         let mut m = p;
-        for j in K*p+1..K*p+1+K {
+        for j in D*p+1..D*p+1+D {
             if j >= a.len() {
                 break
             };
@@ -191,7 +192,7 @@ fn heapsort_insert(a: &mut Vec<u32>) {
 
 #[test]
 fn test_heapsort_insert() {
-    let n = 3*K+17;
+    let n = 3*D+17;
     let mut a = unsorted(n);
     heapsort_insert(&mut a);
     assert!(a.len() == n);
@@ -200,11 +201,11 @@ fn test_heapsort_insert() {
     }
 }
 
-#[cfg(test)]
-#[bench]
-fn bench_heapsort_insert(b: &mut Bencher) {
+#[test]
+fn bench_heapsort_insert() {
     let mut a: Vec<u32> = (0..N_BENCH).collect();
-    b.iter(|| heapsort_insert(&mut a))
+    Criterion::default().bench_function(
+        "heapsort_insert", |b| b.iter(|| heapsort_insert(&mut a)));
 }
 
 pub fn main() {
