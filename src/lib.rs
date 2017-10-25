@@ -45,13 +45,13 @@ pub fn heapsort<E: Ord>(a: &mut[E]) {
     }
 }
 
-pub fn extract<E: Ord + Copy>(a: &mut Vec<E>) -> E {
-    assert!(a.len() > 0);
-    let r = a[0];
-    let m = a.pop().unwrap();
+pub fn extract<E: Ord>(a: &mut Vec<E>) -> E {
+    let n = a.len();
+    assert!(n > 0);
+    a.swap(0, n - 1);
+    let r = a.pop().unwrap();
     if a.len() > 0 {
-        a[0] = m;
-        downheap(a, 0);
+        downheap(a, 0)
     };
     r
 }
