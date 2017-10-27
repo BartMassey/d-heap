@@ -18,7 +18,7 @@ use pcg_rand::Pcg32;
 
 const K: usize = 1024;
 
-const N_BENCH: u32 = 16*K as u32;
+const SIZES: [usize;4] = [K, 4*K, 16*K, 64*K];
 
 // XXX Copy-paste from test.
 fn unsorted(n: usize) -> Vec<u32> {
@@ -39,7 +39,7 @@ fn bench_heapsort() {
         |b, &&size| {
             let mut a: Vec<u32> = (0u32..size as u32).collect();
             b.iter(|| heapsort(&mut a))
-        }, &[K, 4*K, 16*K, 64*K]);
+        }, &SIZES);
 }
 
 fn heapsort_extract(mut a: &mut Vec<u32>) -> Vec<u32> {
@@ -66,12 +66,11 @@ fn test_heapsort_extract() {
 
 #[test]
 fn bench_heapsort_extract() {
-    let a: Vec<u32> = (0..N_BENCH).collect();
-    Criterion::default().bench_function(
-        "heapsort_extract",
-        |b| b.iter(|| {
-            let r = heapsort_extract(&mut a.clone());
-            assert!(r[0] == 0)}));
+    Criterion::default().bench_function_over_inputs("heapsort_extract",
+        |b, &&size| {
+            let mut a: Vec<u32> = (0u32..size as u32).collect();
+            b.iter(|| heapsort_extract(&mut a))
+        }, &SIZES);
 }
 
 
@@ -102,7 +101,9 @@ fn test_heapsort_insert() {
 
 #[test]
 fn bench_heapsort_insert() {
-    let mut a: Vec<u32> = (0..N_BENCH).collect();
-    Criterion::default().bench_function(
-        "heapsort_insert", |b| b.iter(|| heapsort_insert(&mut a)));
+    Criterion::default().bench_function_over_inputs("heapsort_insert",
+        |b, &&size| {
+            let mut a: Vec<u32> = (0u32..size as u32).collect();
+            b.iter(|| heapsort_insert(&mut a))
+        }, &SIZES);
 }
