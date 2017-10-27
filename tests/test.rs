@@ -50,3 +50,32 @@ fn test_heapsort() {
         assert!(a[i-1] <= a[i]);
     }
 }
+
+#[test]
+fn test_extract() {
+    let mut a = unsorted(37*D+129);
+    let mut b = a.clone();
+    a.sort();
+    heapify(&mut b);
+    for i in (0..a.len()).rev() {
+        let e = extract(&mut b);
+        checkheap(&b, 0);
+        assert!(a[i] == e);
+    }
+}
+
+#[test]
+fn test_insert() {
+    let mut a = unsorted(37*D+129);
+    let mut b = Vec::with_capacity(a.len());
+    for i in 0..a.len() {
+        insert(&mut b, a[i]);
+        checkheap(&b, 0);
+    };
+    a.sort();
+    for i in (0..a.len()).rev() {
+        let e = extract(&mut b);
+        checkheap(&b, 0);
+        assert!(a[i] == e);
+    }
+}

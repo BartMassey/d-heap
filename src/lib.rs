@@ -60,19 +60,10 @@ fn upheap<E: Ord>(a: &mut[E], i0: usize) {
     let mut i = i0;
     while i > 0 {
         let p = (i - 1) / D;
-        let mut m = p;
-        for j in D*p+1..D*p+1+D {
-            if j >= a.len() {
-                break
-            };
-            if a[j] > a[m] {
-                m = j
-            }
-        };
-        if m == p {
+        if a[p] >= a[i] {
             return
-        };
-        a.swap(p, m);
+        }
+        a.swap(p, i);
         i = p;
     }
 }
