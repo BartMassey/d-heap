@@ -12,7 +12,6 @@ authors = ["Bart Massey <bart@cs.pdx.edu>"]
 [dev-dependencies]
 criterion = { git = "https://github.com/japaric/criterion.rs.git" }
 rand = "0"
-pcg_rand = "0.7"
 
 [lib]
 name = "dheap"

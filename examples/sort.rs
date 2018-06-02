@@ -9,19 +9,16 @@ extern crate dheap;
 
 // XXX Copy-paste of test code.
 
-extern crate pcg_rand;
 extern crate rand;
 
 use rand::Rng;
-use pcg_rand::Pcg32;
 
 fn unsorted(n: usize) -> Vec<u32> {
-    let mut pcg = Pcg32::new_unseeded();
+    let mut rng = rand::thread_rng();
     let mut a: Vec<u32> = Vec::with_capacity(n);
-    // XXX First call always returns 0. This seems like a bug.
-    let _: u32 = pcg.gen();
+    let _: u32 = rng.gen();
     for _ in 0..n {
-        a.push(pcg.gen())
+        a.push(rng.gen())
     };
     a
 }
